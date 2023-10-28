@@ -1,0 +1,11 @@
+#+hugo_base_dir: ../
+#+TAGS: [ emacs(e) git(g) vhdl(v) ] 
+#+TODO: DRAFT(D)  | DONE(d)
+#+options: author:nil
+
+* DONE My first post                                        :tag1:@category1:
+CLOSED: [2023-04-20 Thu 16:06]
+:PROPERTIES:
+:EXPORT_FILE_NAME: my-first-post
+:END:
+This is my post body
