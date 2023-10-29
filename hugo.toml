@@ -1,4 +1,4 @@
-baseURL = '/'
+baseURL = 'https://bjfer.github.io/'
 languageCode = 'en-us'
 title = 'B. Fernandes Blog'
 paginate = 10
