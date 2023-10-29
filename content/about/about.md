@@ -7,7 +7,9 @@ nonav: true
 hidden: true
 ---
 
-My name is Bruno Fernandes and welcome to my little online notepad, where I make unscheduled posts on how I use software tools in my daily work. 
+Hi! My name is Bruno Fernandes and welcome to my little online notepad,
+where I make unscheduled posts on how I use software tools in my daily
+work.
 
 I am currently working in the [European XFEL](https://www.xfel.eu/) as
 the Leader of the **Fast Electronics Team**, part of the Electronics
