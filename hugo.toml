@@ -18,7 +18,7 @@ pluralizelisttitles = false   # removes the automatically appended "s" on sideba
 
 [params]
     brand = "fernands"                      # name of your site - appears in the sidebar
-    brand_image = "/images/profile-picture.jpg"    # path to the image shown in the sidebar
+    brand_image = "/images/profile.jpg"    # path to the image shown in the sidebar
     description = "random bits and bytes!" # Used as default meta description if not specified in front matter
     dark_mode = false                      # optional - defaults to false
     # favicon = "favicon.png"             # path to favicon (defaults to favicon.png)
