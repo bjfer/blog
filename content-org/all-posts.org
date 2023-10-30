@@ -1,11 +1,19 @@
 #+hugo_base_dir: ../
 #+TAGS: [ emacs(e) git(g) vhdl(v) ] 
-#+TODO: DRAFT(D)  | DONE(d)
+#+TODO: DRAFT(d)  | DONE(D)
 #+options: author:nil
 
-* DONE My first post                                        :tag1:@category1:
-CLOSED: [2023-04-20 Thu 16:06]
+* DONE First post                                     
+CLOSED: [2023-10-30 Mon 23:27]
 :PROPERTIES:
 :EXPORT_FILE_NAME: my-first-post
+:hidedoc:  true
 :END:
-This is my post body
+
+The usual first post, just testing that everything works fine.
+
+It did after a couple of tries ;-) I am using the [[https://themes.gohugo.io/themes/poison/][Poison theme]] and at first I has having problems with my profile picture and my about page not being properly displayed. Adding this line to my =hugo.toml= did the trick:
+
+#+begin_src
+  canonifyurls=true
+#+end_src
