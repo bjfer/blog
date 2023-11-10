@@ -16,23 +16,23 @@ Below is the function code and my keyboard shortcut:
 ```emacs-lisp
 ;; Function
 (defun bjf/quick-support (minutes-started)
-;; Function to track the time spent with on the spot support, i.e. unscheduled dialogues/actiosn with colleagues. It requests how many minutes I worked on it, a title and if I should continue clokcing the last task.
-(interactive "NMinutes:")
-(save-excursion
-(let ((support-start-time
-(encode-time (decoded-time-add (decode-time) (make-decoded-time :minute (- minutes-started))))))
-(with-current-buffer "todos.org"
-;; If clocked in a task, stopped it when support started
-(org-clock-out nil t support-start-time)
-(goto-char (org-find-exact-headline-in-buffer "Quick Support" "todos.org"))
-(org-goto-sibling)
-(org-insert-subheading t)
-(insert (concat (read-string "Title: ") "\t\n:CLOCKING:\n CLOCK: "
-(format-time-string "[%Y-%m-%d %a %H:%M]" support-start-time) "--"
-(format-time-string "[%Y-%m-%d %a %H:%M]") " => "
-(format "%02d:%02d" (/ minutes-started 60) (% minutes-started 60))
-"\n:END:\n"))))
-(if (y-or-n-p "Continue last task?") (org-clock-in-last))))
+  ;; Function to track the time spent with on the spot support, i.e. unscheduled dialogues/actiosn with colleagues. It requests how many minutes I worked on it, a title and if I should continue clokcing the last task.
+  (interactive "NMinutes:")
+  (save-excursion
+	(let ((support-start-time
+		(encode-time (decoded-time-add (decode-time) (make-decoded-time :minute (- minutes-started))))))
+	  (with-current-buffer "todos.org"
+		  ;; If clocked in a task, stopped it when support started
+		  (org-clock-out nil t support-start-time)
+		  (goto-char (org-find-exact-headline-in-buffer "Quick Support" "todos.org"))
+		  (org-goto-sibling)
+		  (org-insert-subheading t)
+		  (insert (concat (read-string "Title: ") "\t\n:CLOCKING:\n CLOCK: "
+			  (format-time-string "[%Y-%m-%d %a %H:%M]" support-start-time) "--"
+			  (format-time-string "[%Y-%m-%d %a %H:%M]") " => "
+			  (format "%02d:%02d" (/ minutes-started 60) (% minutes-started 60))
+			  "\n:END:\n"))))
+	  (if (y-or-n-p "Continue last task?") (org-clock-in-last))))
 
 (global-set-key (kbd "C-c q") #'bjf/quick-support)
 ```
