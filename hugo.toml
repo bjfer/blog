@@ -53,7 +53,7 @@ pluralizelisttitles = false   # removes the automatically appended "s" on sideba
     #telegram_url = "https://telegram.org"
     #matrix_url = "https://matrix.org"
     #xmpp_url = "https://xmpp.org"
-    email_url = "mailto://br.fernandes@pm.me"
+    email_url = "mailto://blog.cross099@aleeas.com"
 
     # NOTE: If you don't want to use RSS, comment or delete the following lines
     # Adds an RSS icon to the end of the socials which links to {{ .Site.BaseURL }}/index.xml

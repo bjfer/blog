@@ -124,7 +124,7 @@ At the end of the day, I usually review these entries and assign tags, which I t
 
 It is surprising how much these little pebbles of time can accumulate over the course of a month. My monthly clock report stated that 15% of my time was being spent on these tasks when I first started using this function. I use this information to create new team tasks based on the more prominent tags, which are usually something related to /Documentation/ and /Workflows/. Colleagues and users definitely come much better nowadays, allowing us to not only quickly get to the core of the issue or question but also dive into alternate solutions. 
 
-* DONE Rust HDL TOML generator                                   :emacs:vhdl:
+* DONE VHDL-TS TOML generator                                    :emacs:vhdl:
 CLOSED: [2025-02-15 Sat 14:34]
 :PROPERTIES:
 :EXPORT_FILE_NAME: rust-hdl-toml-gen
