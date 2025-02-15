@@ -78,7 +78,6 @@ My pre-commit hook is below:
 
 If you find this useful, be sure to let me know by emailing me! I also welcome any feedback and/or suggestions!
 
-
 * DONE Documenting unscheduled tasks in Org mode                  :org:emacs:
 CLOSED: [2023-11-09 Thu 22:58]
 :PROPERTIES:
@@ -125,3 +124,30 @@ At the end of the day, I usually review these entries and assign tags, which I t
 
 It is surprising how much these little pebbles of time can accumulate over the course of a month. My monthly clock report stated that 15% of my time was being spent on these tasks when I first started using this function. I use this information to create new team tasks based on the more prominent tags, which are usually something related to /Documentation/ and /Workflows/. Colleagues and users definitely come much better nowadays, allowing us to not only quickly get to the core of the issue or question but also dive into alternate solutions. 
 
+* DONE Rust HDL TOML generator                                   :emacs:vhdl:
+CLOSED: [2025-02-15 Sat 14:34]
+:PROPERTIES:
+:EXPORT_FILE_NAME: rust-hdl-toml-gen
+:hidedoc:  true
+:END:
+
+I use [[https://github.com/VHDL-LS/rust_hdl][Rust HDL]] as my VHDL language server for [[https://emacs-lsp.github.io/lsp-mode/][lsp mode]]. This combined with [[https://www.gnu.org/software/emacs/manual/html_mono/vhdl-mode.html][vhdl major mode]], and other packages such as [[https://github.com/gmlarumbe/vhdl-ext][vhdl-ext]], provides me with a very robust IDE within Emacs for my VHDL projects.
+
+A requirement of the language server is to have a =vhdl_ls.toml= file which includes all sources used on a project. Even with glob patterns, it can get annoying when a new source/folder/module needs to be added; the =toml= file must be updated accordingly and one can easily forget to add that one folder or file.
+
+To address this, I wrote a [[https://github.com/bjfer/hdl-toml][Rust HDL TOML generator]] to assist in generate and maintain these toml files. It is a simple =elisp script= that should be added to a folder in Emacs' load-path and then, in the init file, just add the line ~(require 'hdl-toml)~. It can create projects, add, update or delete sources and provides some customization, namely the usage of absolute of relative paths, glob patterns for sources and which vhdl standard do use. 
+
+* DRAFT A tale of three split keyboards (part I)
+
+For two years now, I have experienced stiffness in my hands. It is not a constant feeling; some mornings I must wait before trying to grab things. If I grab my Kindle or smartphone to do some reading, I have to shift the weight from time to time, even worse if I play Switch; when clenching my fists, I feel that the strength is not what it used to be. When the first symptoms showed up, the pain was really harsh; I consulted with my family doctor as well as a rheumatologist, who recommended some special blood analysis, but nothing definitive was found.
+
+Medically, the search continues, but I decided to do my own research, and my symptoms seem to be consistent with [[https://www.orthopaediezentrum-muenchenost.de/en/orthopedics/diseases/carpal-tunnel-syndrome/][Carpal Tunnel Syndrome]] (CTS).  Instinctively I thought that it might come from my heavy keyboard use; some studies point to [[https://www.sciencedirect.com/science/article/abs/pii/S0022510X14008028][in this direction]], particularly for mice users, while others concluded that [[https://onlinelibrary.wiley.com/doi/epdf/10.1002/art.22956][the opposite is more likely]]. Either way, while searching for ways to mitigate the issue, I found myself falling into the rabbit hole of split keyboards.
+
+There is tons of information on the internet concerning the advantages of using a split keyboard; I was vaguely familiar with them but never thought of getting one. A constant remark in online communities was how much it helped with their CTS, so I decided to try one myself. There are a lot of companies providing such keyboards, some of which focus on DIY kits for soldering your own and have tons of customization: type of switches, caps, colors, RGB lighting, etc. Then there are the open-source firmwares for such keyboards, different GUIs, and possibilities for key customization; it can be overwhelming. In this and following posts, I will try to summarize my experience with three different split keyboards.
+
+** The Voyager from ZSA Technology labs
+
+
+# Local Variables:
+# languagetool-local-disabled-rules: ("EN_UNPAIRED_QUOTES")
+# End:
