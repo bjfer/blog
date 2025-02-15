@@ -131,11 +131,11 @@ CLOSED: [2025-02-15 Sat 14:34]
 :hidedoc:  true
 :END:
 
-I use [[https://github.com/VHDL-LS/rust_hdl][Rust HDL]] as my VHDL language server for [[https://emacs-lsp.github.io/lsp-mode/][lsp mode]]. This combined with [[https://www.gnu.org/software/emacs/manual/html_mono/vhdl-mode.html][vhdl major mode]], and other packages such as [[https://github.com/gmlarumbe/vhdl-ext][vhdl-ext]], provides me with a very robust IDE within Emacs for my VHDL projects.
+I use [[https://github.com/VHDL-LS/rust_hdl][VHDL-LS]] as my VHDL language server for [[https://emacs-lsp.github.io/lsp-mode/][lsp mode]]. This combined with [[https://www.gnu.org/software/emacs/manual/html_mono/vhdl-mode.html][vhdl major mode]], and other packages such as [[https://github.com/gmlarumbe/vhdl-ext][vhdl-ext]], provides me with a very robust IDE within Emacs for my VHDL projects.
 
 A requirement of the language server is to have a =vhdl_ls.toml= file which includes all sources used on a project. Even with glob patterns, it can get annoying when a new source/folder/module needs to be added; the =toml= file must be updated accordingly and one can easily forget to add that one folder or file.
 
-To address this, I wrote a [[https://github.com/bjfer/hdl-toml][Rust HDL TOML generator]] to assist in generate and maintain these toml files. It is a simple =elisp script= that should be added to a folder in Emacs' load-path and then, in the init file, just add the line ~(require 'hdl-toml)~. It can create projects, add, update or delete sources and provides some customization, namely the usage of absolute of relative paths, glob patterns for sources and which vhdl standard do use. 
+To address this, I wrote a [[https://github.com/bjfer/hdl-toml][VHDL-LS TOML generator]] to assist in generate and maintain these toml files. It is a simple =elisp script= that should be added to a folder in Emacs' load-path and then, in the init file, just add the line ~(require 'hdl-toml)~. It can create projects, add, update or delete sources and provides some customization, namely the usage of absolute of relative paths, glob patterns for sources and which vhdl standard do use. 
 
 * DRAFT A tale of three split keyboards (part I)
 
