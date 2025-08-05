@@ -146,6 +146,10 @@ There is tons of information on the internet concerning the advantages of using 
 
 * DONE Trying FuseSoc                                                  :vhdl:
 CLOSED: [2025-08-05 Tue 22:53]
+:PROPERTIES:
+:EXPORT_FILE_NAME: intro-fusesoc
+:hidedoc:  true
+:END:
 
 I recently decided to try out [[https://github.com/olofk/fusesoc][FuseSoC]] in one of my FPGA work projects to see how easy the migration would be. The following are my impressions of using the tool, without going into detail about FuseSoC and Edalize; my suggestion would be that you check the documentation and then read this post to get to know a practical example.
 
