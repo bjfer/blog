@@ -1,9 +1,9 @@
 #+hugo_base_dir: ../
-#+TAGS: [ emacs(e) git(g) vhdl(v) org(o) ] 
+#+TAGS: [ emacs(e) git(g) vhdl(v) org(o) ]
 #+TODO: DRAFT(d)  | DONE(D)
 #+options: author:nil
 
-* DONE First post                                     
+* DONE First post
 CLOSED: [2023-10-30 Mon 23:27]
 :PROPERTIES:
 :EXPORT_FILE_NAME: my-first-post
@@ -31,7 +31,6 @@ As an incentive, here is the git pre-commit hook I use in most of my VHDL projec
 
 - checks if there are new HDL sources that have not been added to the repository
 - for all modified HDL sources, use Emacs in batch mode to align the code and remove unnecessary whitespace
-
 
 The most common whitespace I add is trailing and extra blank lines. Emacs has a straightforward command to delete the former, =delete-trailing-whitespace=, and using a =replace-regexp=, I can substitute multiple blank lines for just one. Aligning VHDL code is done with the =vhdl-beautify-buffer= command.
 
@@ -122,7 +121,7 @@ Below is the function code and my keyboard shortcut:
 
 At the end of the day, I usually review these entries and assign tags, which I think reflect what was lacking from my side for the support to take place for the first time. If a task needs follow-up, I just treat it like any other one on that file (logbook, TODO state, etc.); otherwise, they are all considered close.
 
-It is surprising how much these little pebbles of time can accumulate over the course of a month. My monthly clock report stated that 15% of my time was being spent on these tasks when I first started using this function. I use this information to create new team tasks based on the more prominent tags, which are usually something related to /Documentation/ and /Workflows/. Colleagues and users definitely come much better nowadays, allowing us to not only quickly get to the core of the issue or question but also dive into alternate solutions. 
+It is surprising how much these little pebbles of time can accumulate over the course of a month. My monthly clock report stated that 15% of my time was being spent on these tasks when I first started using this function. I use this information to create new team tasks based on the more prominent tags, which are usually something related to /Documentation/ and /Workflows/. Colleagues and users definitely come much better nowadays, allowing us to not only quickly get to the core of the issue or question but also dive into alternate solutions.
 
 * DONE VHDL-TS TOML generator                                    :emacs:vhdl:
 CLOSED: [2025-02-15 Sat 14:34]
@@ -135,7 +134,7 @@ I use [[https://github.com/VHDL-LS/rust_hdl][VHDL-LS]] as my VHDL language serve
 
 A requirement of the language server is to have a =vhdl_ls.toml= file which includes all sources used on a project. Even with glob patterns, it can get annoying when a new source/folder/module needs to be added; the =toml= file must be updated accordingly and one can easily forget to add that one folder or file.
 
-To address this, I wrote a [[https://github.com/bjfer/hdl-toml][VHDL-LS TOML generator]] to assist in generate and maintain these toml files. It is a simple =elisp script= that should be added to a folder in Emacs' load-path and then, in the init file, just add the line ~(require 'hdl-toml)~. It can create projects, add, update or delete sources and provides some customization, namely the usage of absolute of relative paths, glob patterns for sources and which vhdl standard do use. 
+To address this, I wrote a [[https://github.com/bjfer/hdl-toml][VHDL-LS TOML generator]] to assist in generate and maintain these toml files. It is a simple =elisp script= that should be added to a folder in Emacs' load-path and then, in the init file, just add the line ~(require 'hdl-toml)~. It can create projects, add, update or delete sources and provides some customization, namely the usage of absolute of relative paths, glob patterns for sources and which vhdl standard do use.
 
 * DRAFT A tale of three split keyboards (part I)
 
@@ -145,9 +144,364 @@ Medically, the search continues, but I decided to do my own research, and my sym
 
 There is tons of information on the internet concerning the advantages of using a split keyboard; I was vaguely familiar with them but never thought of getting one. A constant remark in online communities was how much it helped with their CTS, so I decided to try one myself. There are a lot of companies providing such keyboards, some of which focus on DIY kits for soldering your own and have tons of customization: type of switches, caps, colors, RGB lighting, etc. Then there are the open-source firmwares for such keyboards, different GUIs, and possibilities for key customization; it can be overwhelming. In this and following posts, I will try to summarize my experience with three different split keyboards.
 
-** The Voyager from ZSA Technology labs
+* DONE Trying FuseSoc                                                  :vhdl:
+CLOSED: [2025-08-05 Tue 22:53]
 
+I recently decided to try out [[https://github.com/olofk/fusesoc][FuseSoC]] in one of my FPGA work projects to see how easy the migration would be. The following are my impressions of using the tool, without going into detail about FuseSoC and Edalize; my suggestion would be that you check the documentation and then read this post to get to know a practical example.
 
-# Local Variables:
-# languagetool-local-disabled-rules: ("EN_UNPAIRED_QUOTES")
-# End:
+My project targets a 10x ADC digitizer board which includes a Kintex Untrascale for data processing, the [[https://www.struck.de/sis8300-ku.html][SIS8300Ku]]. The board also includes 2x DACs, exernal clock and trigger interfaces, 2Gb of DDR4 memory, among other interfaces. Different applications (data processing logic) is available for specific experiments and setups, while the board logic remains the same, i.e. the code that allows configuration and monitorization of the hardware features. A =project=, in this context, is the combination of a particular =application module= and the common =board module=, a fairly common scenario.
+
+All =applications= must have the =timingInfo= module; it decodes timing related information and includes generics to generate or exclude logic (again, depends on the application).
+
+#+begin_src d2 :file static/images/fpga.png
+project : FPGA project {
+   label.near: top-left
+    board: {
+    label.near: top-left
+      ADC
+      DAC
+      bd design: {
+      DDR
+      PCIe
+      }
+      Misc
+    }
+
+    application: {
+    label.near: top-left
+       timingInfo
+       data processing
+    }
+
+  board <-> application
+
+}
+#+end_src
+
+#+RESULTS:
+[[file:static/images/fpga.png]]
+
+With this scenario in mind, I wanted to update my project in the following manner:
+
+- declare the =timingInfo= as a remote core. Currently, the module is included as a git submodule
+- have a core file to synthesize the =board module=, separated from the final project, to generate a /Design Checkpoint/ file. This file should then be included in all projects, saving compilation time
+- have a single core file for all applications; each target will be a FPGA project, i.e the =board logic=, the files for a specific =application logic= and the =timingInfo= configure with the proper ~generics~ values for that application
+
+#+BEGIN_SRC d2 :file static/images/fuse.png
+application: FuseSoC core file {
+  target 1: bit for application 1 {
+    label.near: top-left
+    data processing 1
+    board: board module core (dcp file)
+    remote core (timingInfo)
+  }
+}
+#+END_SRC
+
+#+RESULTS:
+[[file:static/images/fuse.png]]
+
+** Remote core
+
+After creating a =fusesoc.conf= file in the root folder of my project, adding the =timingInfo= module as a remote core was straightforward:
+
+#+begin_src shell
+  fusesoc library add timingInfo gitLinkToModule
+#+end_src
+
+The proper lines will be added to the =fusesoc.conf= file; since I needed to add a ~.core~ file to the project, I created a new branch, /test/fusesoc/. To make sure that the tool downloads the right branch, the property *sync-version* needed to be added to the =fusesoc.conf= together with the branch name (could have been the sha value as well).
+
+#+begin_quote
+# Lines added to .conf file. The last line was manually added
+[library.timingInfo]
+location = fusesoc_libraries/timingInfo
+sync-uri = gitLinkToModule
+sync-type = git
+*sync-version = test/fusesoc*
+#+end_quote
+
+The =timingInfo.core= /YAML/ file is shown below. For now the only target is the *default*, since this is the one that is used when _referencing the core within another top core_. This means that all files in the rtl set and the defined generics will be available in the top's core target that uses timingInfo as a dependency.
+
+#+begin_src yaml
+  CAPI=2:
+  name: euxfel:common:timingInfo:1.8.2
+  description: TimingInfo module
+
+  filesets:
+    rtl:
+      files:
+	- files1.vhd
+	- src/file2.vhd
+	- ...
+      file_type: vhdlSource-2008
+
+  targets:
+    default: &default
+      filesets:
+	- rtl
+      parameters:
+	- generic1=true
+	- generic2=3
+	- ...
+
+  parameters:
+    generic1:
+      datatype    : bool
+      description : Enable feature 1
+      paramtype   : generic
+    generic2:
+      datatype    : int
+      description : Size of output 2
+      paramtype   : generic
+    ...
+#+end_src
+
+From this simple core, a couple of first impressions:
+
+- each source must be specifically mention, there is no use of regular expressions. This can be seen as quite annoying or a fail-safe: only the required sources are added to the proper list.
+- the sync-version property is *not* mention in the documentation, I happen to find another FuseSoC project that used it. Running the command /fusesoc library add --help/ would also show that the option.
+- the property /name/ follows the VLNV convention, introducing yet another version number. In our case, git's /sha/ would be enough, and the module itself includes a hardware coded version, so we now have three version numbers to maintain. The information _is optional_, however when taking into account that only the default target is read when sourcing a core file, the role of FuseSoC's version could be used in these example scenarios:
+  + entities with multiple architectures (and sources associated with the latter)
+  + different sources depending on specific FPGA platforms (this could also be covered [[https://fusesoc.readthedocs.io/en/stable/user/build_system/flags.html#using-flags][using flags]])
+  + manage exposed generics to the top module
+
+** Generating the board checkpoint file
+
+Since my =.conf= file is saved in the root directory of the project, I need to update it so that it also searches for core files in that directory. This is easily done running
+
+#+begin_src shell
+  fusesoc library add --sync-type local sis8300ku .
+#+end_src
+
+The .conf file will then be updated to include the following lines:
+
+#+begin_quote
+[library.sis8300ku]
+location = /full/path/to/project
+sync-uri = .
+sync-type = local
+auto-sync = true
+#+end_quote
+
+I grouped the different type of files of the board into filesets in =board.core= file.
+
+#+begin_src yaml
+  CAPI=2:
+
+  name: euxfel:sis8300ku:board:0.20.14
+  description: SIS8300 KU board logic
+
+  filesets:
+    rtl:
+      files:
+	- sources/hdl/file1.vhd
+	- sources/hdl/file2.vhd
+	    file_type: vhdlSource
+	...
+      file_type: vhdlSource-2008
+    configProj:
+      files:
+	- scripts/vivadoProject.tcl
+	- sources/bd/pcie_ddr.tcl
+	- scripts/bdWrapper.tcl
+    file_type: tclSource
+      file_type: tclSource
+    genBoardCheckpoint:
+      files:
+	- scripts/genCheckpoint.tcl:
+	    file_type: user
+	- scripts/genCheckpointCall.tcl
+	file_type: tclSource
+    boardCheckpoint:
+      files:
+	- sources/dcp/board.dcp:
+	    file_type: user
+	- scripts/addDcp.tcl:
+	    file_type: tclSource
+#+end_src
+
+A couple of new concepts are show:
+
+- all rtl files are define as =vhdl-08= sources except =file2.vhd=, but there is no need to create a separate fileset.
+- the =vivadoProject.tcl= script configures the vivado tool to my project. Some of these options include VHDL as the target language and use a specific folder as the source of user IPs. Specifying it as a =tclScript= file makes sure that vivado will source it when creating the project.
+- a =user= file type should not be imported by the tool (in my case vivado) but must be included in the build directory that FuseSOC will create. You can use the /--no-export/ flag in FuseSoC so that sources are not copied into the build directory - this is my prefer case, as to avoid situations where I start fixing the copy.
+- since the checkpoint point is not a default artifact of /Edalize's/ /build/, the =genBoardCheckpoint= fileset includes the =genCheckpointCall.tcl= source that will call the user file =genCheckpoint.tcl=. The latter must be added in case another FuseSoC user does not use the /--no-export/ flag. The tcl commands to generate the checkpoint file are:
+  #+begin_quote
+  # Get absolute path of the script
+  set scriptLocation [file normalize [info script]]
+  # genCheckpoint.tcl should be in the same folder as this script
+  # property STEPS.SYNTH_DESIGN.TCL.POST will make sure to run genCheckpoint.tcl after successful synthesis
+  set_property STEPS.SYNTH_DESIGN.TCL.POST "[file dirname $scriptLocation]/genCheckpoint.tcl" [get_runs synth_1]
+  #+end_quote
+- finally, the =boardCheckpoint= includes the generated dcp file and a script to read it in a vivado project since FuseSoC does not recognize .dcp files. This fileset will be my default target, i.e., these should be the only files imported on my final FPGA project.
+
+The rest of the YAML file is as follows:
+
+#+begin_src yaml
+  targets:
+  default: &default
+    filesets:
+      - boardCheckpoint
+    hooks:
+      post_build: [saveMaps]
+
+  fastAdcBoard:
+    filesets:
+      - configProj
+      - rtl
+      - bd
+      - genBoardCheckpoint
+    toplevel: ent_board
+    description: Generate dcp file for SIS8300ku board
+    default_tool: vivado
+    tools:
+      vivado:
+	part: xcku040-ffva1156-1-c
+	pnr: none
+	source_mgmt_mode: All
+    # EDA flow API does not yet support pnr
+    # flow: vivado
+    # flow_options:
+    #     part: xcku040-ffva1156-1-c
+    #     pnr: none
+    #     source_mgmt_mode: All
+   #Save artifacts
+    hooks:
+      post_build: [saveMaps]
+
+scripts:
+  saveMaps:
+    cmd: ['cp','*.maps','../../../dist/maps/']
+#+end_src
+
+The =fastAdcBoard= target generates the desired checkpoint file; with ~pnr: none,~ Edalize will stop the build right after the synthesis. This option is not yet supported in the new Edalize flow API, hence I am using the legacy tool API. There are also custom maps files generated by an internal board module which should be saved; a =hook= is defined that should run after build is completed.
+
+Running FuseSOC with the /--setup/ flag will create the build folder, tcl scripts and Makefile file used later by the vivado tool to create, compile and run the project. This is very convenient for debugging, experiment (change tcl scripts created, create new Makefile targets, etc.) or just create the project to then continue in vivado. It also made it clear that the /post_build/ hook defined in my core file would never run, since Edalize's build *always assumes that a bit file is generated*.
+
+Edalize supports [[https://edalize.readthedocs.io/en/latest/edam/api.html#tool-options][a great number of tools]], however the list of options per tool is quite niche. I was surprised that simple parameters, like the target language in vivado, is not readily available. This is to say, be prepared to write some simple scripts for your tool when migrating to FuseSoC.
+
+** The project core file
+
+The last core file uses the previous two as dependencies, and each target defines a bit file that integrates a different application, i.e. a collection of source files for specific data processing.
+
+#+begin_src yaml
+  CAPI=2:
+
+  name: euxfel:sis8300ku:applications:0.9.1
+  description: SIS8300 KU applications
+
+  filesets:
+    topDesign:
+      files:
+	- sources/hdl/TOP_SIS8300_KU.vhd
+	- sources/hdl/PKG_UTILS.vhd
+	- sources/constraints/board_pins.xdc:
+	    file_type: xdc
+	- sources/constraints/board_fpga_constrains.xdc:
+	    file_type: xdc
+	- scripts/vhdlProject.tcl:
+	    file_type: tclSource
+	# Do not use xdc files during synthesis
+	- scripts/constraints.tcl:
+	    file_type: tclSource
+      file_type: vhdlSource-2008
+      depend:
+	- euxfel:sis8300ku:board:0.20.14
+	- ">=euxfel:common:timingInfo:1.8"
+#+end_src
+
+The ~depend~ parameter is where I reference the other two core files; this will import all sources, the generics and any defined hooks from both ~default~ targets of the =timingInfo= and =board= to this fileset. Just as an example, I specify that the board core must have a specific version, while the =timingInfo= must be above or equal to 1.8.
+
+#+begin_src yaml
+  app1:
+    files:
+      - sources/hdl/application_1/file1.vhd
+      - ...
+      - sources/ip/application_1/clk_wiz_dac.xci:
+	  copyto: ip/clk_wiz_dac/clk_wiz_dac.xci
+	  file_type: xci
+      - sources/ip/application_1/c_shift_ram_0.xci:
+	  copyto: ip/clk_wiz_dac/clk_wiz_dac.xci
+	  file_type: xci
+    file_type: vhdlSource-2008
+#+end_src
+
+This is an example of an application fileset which introduces the ~copyto~ parameter. In my project folder, all application specific IPs are under a single folder, however vivado requires that each =xci= must be in a separate folder when these sources are read (not added/imported) into a project. The ~copyto~ takes care of this, specifying the path (inside the build's folder) where the file should be, creating any required subfolder.
+
+#+begin_src yaml
+  targets:
+    # The "default" target is the top module
+    default: &default
+      filesets:
+	- topDesign
+      toplevel: ent_sis8300_ku
+      flow: vivado
+      flow_options:
+	  part: xcku040-ffva1156-1-c
+	  source_mgmt_mode: All
+      parameters:
+	# Default values for timing
+	- generic1=false
+	- generic2=1
+
+    app1:
+      <<: *default
+      filesets_append:
+	- app1
+      description: Application 1
+
+    app2:
+      <<: *default
+      filesets_append:
+	- app2
+      description: Application 2
+      parameters:
+	- generic1=true
+	- generic2=2
+#+end_src
+
+The app targets are very simple and straightforward. If necessary, I could override any of the parameters values of the imported default target, as it is done in =app2= for the timingInfo module. If I were to target a different tool, FuseSOC's makes it very easy to [[https://fusesoc.readthedocs.io/en/stable/user/build_system/flow_options.html][include extra flags]] in the /flow/flow_definitions/ default target definition or [[https://fusesoc.readthedocs.io/en/stable/user/cli.html][via command line]] when calling the tool.
+
+Custom maps are also generated from the apps; the =hook= included in the =fastAdcBoard= default target will take care of copying it to the proper folder.
+
+There is no dependency between targets, so the final project Makefile looks like this:
+
+#+begin_src shell
+  #Get core name
+  define core_name
+	  $(shell sed -n -e 's/^name: \(.*\)/\1/p' $(1))
+  endef
+
+  #Replace in core name : with _
+  define core_name_folder
+	  $(subst :,_,$(1))
+  endef
+
+  FUSESOC := python/environment/fusesoc/bin/fusesoc
+  BOARD_VLNV := $(call core_name, fastAdcBoard.core)
+  BOARD_NAME := $(call core_name_folder, $(BOARD_VLNV))
+  APPS_VLNV := $(call core_name, application.core)
+  APPS_NAME := $(call core_name_folder, $(FASTADC_VLNV))
+
+  DIST_FOLDER := dist
+
+  .PHONY: clean
+  clean:
+  @echo "Deleting contents of the build directory"
+  @rm -rf $(BUILD)
+
+  # Generate board checkpoint
+  fastAdcBoard:
+       $(FUSESOC) run --clean --build --no-export --target $@ $(BOARD_VLNV)
+       # FuseSOC does not run post_build hooks if target does not generate a bit file
+       cp build/${BOARD_NAME}/$@/*.maps ${DIST_FOLDER}/maps
+
+  app1: fastAdcBoard
+       $(FUSESOC) run --clean --build --no-export --target $@ $(APPS_VLNV)
+       #TODO add hook in default target to copy bit file
+       cp build/${APPS_NAME}/$@/*.bit ${DIST_FOLDER}/firmware/
+#+end_src
+
+** Final remarks
+
+There are ton of features from FuseSOC's that were out of my project scope (filters, generators, virtual cores and mappring). Nevertheless, the overall experience is a very positive one. The YAML file really makes the flow clear and very readable, while taking advantage of the format to easily reconfigure/create new projects. The documentation is enough to get simple projects up and running, but many things become more clear by digging into the source files in the git repository.
