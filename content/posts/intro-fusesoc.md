@@ -33,9 +33,13 @@ fusesoc library add timingInfo gitLinkToModule
 The proper lines will be added to the `fusesoc.conf` file; since I needed to add a `.core` file to the project, I created a new branch, _test/fusesoc_. To make sure that the tool downloads the right branch, the property **sync-version** needed to be added to the `fusesoc.conf` together with the branch name (could have been the sha value as well).
 
 > [library.timingInfo]
+>
 > location = fusesoc_libraries/timingInfo
+>
 > sync-uri = gitLinkToModule
+>
 > sync-type = git
+>
 > **sync-version = test/fusesoc**
 
 The `timingInfo.core` _YAML_ file is shown below. For now the only target is the **default**, since this is the one that is used when <span class="underline">referencing the core within another top core</span>. This means that all files in the rtl set and the defined generics will be available in the top's core target that uses timingInfo as a dependency.
@@ -46,32 +50,32 @@ name: euxfel:common:timingInfo:1.8.2
 description: TimingInfo module
 
 filesets:
-rtl:
-files:
-- files1.vhd
-- src/file2.vhd
-- ...
-file_type: vhdlSource-2008
+   rtl:
+      files:
+         - files1.vhd
+         - src/file2.vhd
+         - ...
+      file_type: vhdlSource-2008
 
 targets:
-default: &default
-filesets:
-- rtl
-parameters:
-- generic1=true
-- generic2=3
-- ...
+   default: &default
+   filesets:
+      - rtl
+   parameters:
+      - generic1=true
+      - generic2=3
+      - ...
 
 parameters:
-generic1:
-datatype    : bool
-description : Enable feature 1
-paramtype   : generic
-generic2:
-datatype    : int
-description : Size of output 2
-paramtype   : generic
-...
+   generic1:
+      datatype    : bool
+      description : Enable feature 1
+      paramtype   : generic
+   generic2:
+      datatype    : int
+      description : Size of output 2
+      paramtype   : generic
+   ...
 ```
 
 From this simple core, a couple of first impressions:
@@ -95,9 +99,13 @@ fusesoc library add --sync-type local sis8300ku .
 The .conf file will then be updated to include the following lines:
 
 > [library.sis8300ku]
+>
 > location = /full/path/to/project
+>
 > sync-uri = .
+>
 > sync-type = local
+>
 > auto-sync = true
 
 I grouped the different type of files of the board into filesets in `board.core` file.
@@ -109,32 +117,31 @@ name: euxfel:sis8300ku:board:0.20.14
 description: SIS8300 KU board logic
 
 filesets:
-rtl:
-files:
-- sources/hdl/file1.vhd
-- sources/hdl/file2.vhd
-file_type: vhdlSource
-...
-file_type: vhdlSource-2008
-configProj:
-files:
-- scripts/vivadoProject.tcl
-- sources/bd/pcie_ddr.tcl
-- scripts/bdWrapper.tcl
-file_type: tclSource
-file_type: tclSource
-genBoardCheckpoint:
-files:
-- scripts/genCheckpoint.tcl:
-file_type: user
-- scripts/genCheckpointCall.tcl
-file_type: tclSource
-boardCheckpoint:
-files:
-- sources/dcp/board.dcp:
-file_type: user
-- scripts/addDcp.tcl:
-file_type: tclSource
+   rtl:
+      files:
+         - sources/hdl/file1.vhd
+         - sources/hdl/file2.vhd:
+         file_type: vhdlSource
+         ...
+      file_type: vhdlSource-2008
+  configProj:
+      files:
+         - scripts/vivadoProject.tcl
+         - sources/bd/pcie_ddr.tcl
+         - scripts/bdWrapper.tcl
+      file_type: tclSource
+   genBoardCheckpoint:
+      files:
+         - scripts/genCheckpoint.tcl:
+         file_type: user
+         - scripts/genCheckpointCall.tcl
+      file_type: tclSource
+   boardCheckpoint:
+      files:
+         - sources/dcp/board.dcp:
+         file_type: user
+         - scripts/addDcp.tcl:
+      file_type: tclSource
 ```
 
 A couple of new concepts are show:
@@ -153,39 +160,39 @@ The rest of the YAML file is as follows:
 
 ```yaml
 targets:
-default: &default
-filesets:
-- boardCheckpoint
-hooks:
-post_build: [saveMaps]
+   default: &default
+   filesets:
+      - boardCheckpoint
+   hooks:
+      post_build: [saveMaps]
 
 fastAdcBoard:
-filesets:
-- configProj
-- rtl
-- bd
-- genBoardCheckpoint
-toplevel: ent_board
-description: Generate dcp file for SIS8300ku board
-default_tool: vivado
-tools:
-vivado:
-part: xcku040-ffva1156-1-c
-pnr: none
-source_mgmt_mode: All
-# EDA flow API does not yet support pnr
-# flow: vivado
-# flow_options:
-#     part: xcku040-ffva1156-1-c
-#     pnr: none
-#     source_mgmt_mode: All
-#Save artifacts
-hooks:
-post_build: [saveMaps]
+   filesets:
+      - configProj
+      - rtl
+      - bd
+      - genBoardCheckpoint
+   toplevel: ent_board
+   description: Generate dcp file for SIS8300ku board
+   default_tool: vivado
+   tools:
+      vivado:
+      part: xcku040-ffva1156-1-c
+      pnr: none
+      source_mgmt_mode: All
+   # EDA flow API does not yet support pnr
+   # flow: vivado
+   # flow_options:
+   #     part: xcku040-ffva1156-1-c
+   #     pnr: none
+   #     source_mgmt_mode: All
+   #Save artifacts
+   hooks:
+      post_build: [saveMaps]
 
 scripts:
-saveMaps:
-cmd: ['cp','*.maps','../../../dist/maps/']
+   saveMaps:
+      cmd: ['cp','*.maps','../../../dist/maps/']
 ```
 
 The `fastAdcBoard` target generates the desired checkpoint file; with `pnr: none,` Edalize will stop the build right after the synthesis. This option is not yet supported in the new Edalize flow API, hence I am using the legacy tool API. There are also custom maps files generated by an internal board module which should be saved; a `hook` is defined that should run after build is completed.
@@ -197,7 +204,7 @@ Edalize supports [a great number of tools](https://edalize.readthedocs.io/en/lat
 
 ## The project core file {#the-project-core-file}
 
-The last core file, `applications.core` uses the previous two as dependencies, and each target defines a bit file that integrates a different application, i.e. a collection of source files for specific data processing.
+The last core file, `applications.core`, uses the previous two as dependencies, and each target defines a bit file that integrates a different application, i.e. a collection of source files for specific data processing.
 
 ```yaml
 CAPI=2:
@@ -206,73 +213,73 @@ name: euxfel:sis8300ku:applications:0.9.1
 description: SIS8300 KU applications
 
 filesets:
-topDesign:
-files:
-- sources/hdl/TOP_SIS8300_KU.vhd
-- sources/hdl/PKG_UTILS.vhd
-- sources/constraints/board_pins.xdc:
-file_type: xdc
-- sources/constraints/board_fpga_constrains.xdc:
-file_type: xdc
-- scripts/vhdlProject.tcl:
-file_type: tclSource
-# Do not use xdc files during synthesis
-- scripts/constraints.tcl:
-file_type: tclSource
-file_type: vhdlSource-2008
-depend:
-- euxfel:sis8300ku:board:0.20.14
-- ">=euxfel:common:timingInfo:1.8"
+   topDesign:
+      files:
+         - sources/hdl/TOP_SIS8300_KU.vhd
+         - sources/hdl/PKG_UTILS.vhd
+         - sources/constraints/board_pins.xdc:
+         file_type: xdc
+         - sources/constraints/board_fpga_constrains.xdc:
+         file_type: xdc
+         - scripts/vhdlProject.tcl:
+         file_type: tclSource
+         # Do not use xdc files during synthesis
+         - scripts/constraints.tcl:
+         file_type: tclSource
+      file_type: vhdlSource-2008
+      depend:
+         - euxfel:sis8300ku:board:0.20.14
+         - ">=euxfel:common:timingInfo:1.8"
 ```
 
 The `depend` parameter is where I reference the other two core files; this will import all sources, the generics and any defined hooks from both `default` targets of the `timingInfo` and `board` to this fileset. Just as an example, I specify that the board core must have a specific version, while the `timingInfo` must be above or equal to 1.8.
 
 ```yaml
 app1:
-files:
-- sources/hdl/application_1/file1.vhd
-- ...
-- sources/ip/application_1/clk_wiz_dac.xci:
-copyto: ip/clk_wiz_dac/clk_wiz_dac.xci
-file_type: xci
-- sources/ip/application_1/c_shift_ram_0.xci:
-copyto: ip/clk_wiz_dac/clk_wiz_dac.xci
-file_type: xci
-file_type: vhdlSource-2008
+   files:
+      - sources/hdl/application_1/file1.vhd
+      - ...
+      - sources/ip/application_1/clk_wiz_dac.xci:
+      copyto: ip/clk_wiz_dac/clk_wiz_dac.xci
+      file_type: xci
+      - sources/ip/application_1/c_shift_ram_0.xci:
+      copyto: ip/clk_wiz_dac/clk_wiz_dac.xci
+      file_type: xci
+   file_type: vhdlSource-2008
 ```
 
 This is an example of an application fileset which introduces the `copyto` parameter. In my project folder, all application specific IPs are under a single folder, however vivado requires that each `xci` must be in a separate folder when these sources are read (not added/imported) into a project. The `copyto` takes care of this, specifying the path (inside the build's folder) where the file should be, creating any required subfolder.
 
 ```yaml
 targets:
-# The "default" target is the top module
-default: &default
-filesets:
-- topDesign
-toplevel: ent_sis8300_ku
-flow: vivado
-flow_options:
-part: xcku040-ffva1156-1-c
-source_mgmt_mode: All
-parameters:
-# Default values for timing
-- generic1=false
-- generic2=1
+   # The "default" target is the top module
+   default: &default
+   filesets:
+      - topDesign
+   toplevel: ent_sis8300_ku
+   flow: vivado
+   flow_options:
+      part: xcku040-ffva1156-1-c
+      source_mgmt_mode: All
+   parameters:
+   # Default values for timing
+      - generic1=false
+      - generic2=1
 
 app1:
-<<: *default
-filesets_append:
-- app1
-description: Application 1
+   <<: *default
+   filesets_append:
+      - app1
+   description: Application 1
 
 app2:
-<<: *default
-filesets_append:
-- app2
-description: Application 2
-parameters:
-- generic1=true
-- generic2=2
+   <<: *default
+   filesets_append:
+      - app2
+   description: Application 2
+   parameters:
+      - generic1=true
+      - generic2=2
 ```
 
 The app targets are very simple and straightforward. If necessary, I could override any of the parameters values of the imported default target, as it is done in `app2` for the timingInfo module. If I were to target a different tool, FuseSOC's makes it very easy to [include extra flags](https://fusesoc.readthedocs.io/en/stable/user/build_system/flow_options.html) in the _flow/flow_definitions_ default target definition or [via command line](https://fusesoc.readthedocs.io/en/stable/user/cli.html) when calling the tool.
@@ -307,14 +314,14 @@ clean:
 
 # Generate board checkpoint
 fastAdcBoard:
-$(FUSESOC) run --clean --build --no-export --target $@ $(BOARD_VLNV)
-# FuseSOC does not run post_build hooks if target does not generate a bit file
-cp build/${BOARD_NAME}/$@/*.maps ${DIST_FOLDER}/maps
+   $(FUSESOC) run --clean --build --no-export --target $@ $(BOARD_VLNV)
+   # FuseSOC does not run post_build hooks if target does not generate a bit file
+   cp build/${BOARD_NAME}/$@/*.maps ${DIST_FOLDER}/maps
 
 app1: fastAdcBoard
-$(FUSESOC) run --clean --build --no-export --target $@ $(APPS_VLNV)
-#TODO add hook in default target to copy bit file
-cp build/${APPS_NAME}/$@/*.bit ${DIST_FOLDER}/firmware/
+   $(FUSESOC) run --clean --build --no-export --target $@ $(APPS_VLNV)
+   #TODO add hook in default target to copy bit file
+   cp build/${APPS_NAME}/$@/*.bit ${DIST_FOLDER}/firmware/
 ```
 
 
