@@ -386,7 +386,7 @@ Edalize supports [[https://edalize.readthedocs.io/en/latest/edam/api.html#tool-o
 
 ** The project core file
 
-The last core file uses the previous two as dependencies, and each target defines a bit file that integrates a different application, i.e. a collection of source files for specific data processing.
+The last core file, =applications.core= uses the previous two as dependencies, and each target defines a bit file that integrates a different application, i.e. a collection of source files for specific data processing.
 
 #+begin_src yaml
   CAPI=2:
@@ -482,9 +482,9 @@ There is no dependency between targets, so the final project Makefile looks like
   endef
 
   FUSESOC := python/environment/fusesoc/bin/fusesoc
-  BOARD_VLNV := $(call core_name, fastAdcBoard.core)
+  BOARD_VLNV := $(call core_name, board.core)
   BOARD_NAME := $(call core_name_folder, $(BOARD_VLNV))
-  APPS_VLNV := $(call core_name, application.core)
+  APPS_VLNV := $(call core_name, applications.core)
   APPS_NAME := $(call core_name_folder, $(FASTADC_VLNV))
 
   DIST_FOLDER := dist
