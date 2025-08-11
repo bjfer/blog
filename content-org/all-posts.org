@@ -2,6 +2,8 @@
 #+TAGS: [ emacs(e) git(g) vhdl(v) org(o) ]
 #+TODO: DRAFT(d)  | DONE(D)
 #+options: author:nil
+#+hugo_code_fence: t
+
 
 * DONE First post
 CLOSED: [2023-10-30 Mon 23:27]
@@ -123,7 +125,7 @@ At the end of the day, I usually review these entries and assign tags, which I t
 
 It is surprising how much these little pebbles of time can accumulate over the course of a month. My monthly clock report stated that 15% of my time was being spent on these tasks when I first started using this function. I use this information to create new team tasks based on the more prominent tags, which are usually something related to /Documentation/ and /Workflows/. Colleagues and users definitely come much better nowadays, allowing us to not only quickly get to the core of the issue or question but also dive into alternate solutions.
 
-* DONE VHDL-TS TOML generator                                    :emacs:vhdl:
+* DONE VHDL-LS TOML generator                                    :emacs:vhdl:
 CLOSED: [2025-02-15 Sat 14:34]
 :PROPERTIES:
 :EXPORT_FILE_NAME: rust-hdl-toml-gen
@@ -218,9 +220,13 @@ The proper lines will be added to the =fusesoc.conf= file; since I needed to add
 #+begin_quote
 # Lines added to .conf file. The last line was manually added
 [library.timingInfo]
+
 location = fusesoc_libraries/timingInfo
+
 sync-uri = gitLinkToModule
+
 sync-type = git
+
 *sync-version = test/fusesoc*
 #+end_quote
 
@@ -234,19 +240,19 @@ The =timingInfo.core= /YAML/ file is shown below. For now the only target is the
   filesets:
     rtl:
       files:
-	- files1.vhd
-	- src/file2.vhd
-	- ...
+        - files1.vhd
+        - src/file2.vhd
+        - ...
       file_type: vhdlSource-2008
 
   targets:
     default: &default
       filesets:
-	- rtl
+        - rtl
       parameters:
-	- generic1=true
-	- generic2=3
-	- ...
+        - generic1=true
+        - generic2=3
+        - ...
 
   parameters:
     generic1:
@@ -281,9 +287,13 @@ The .conf file will then be updated to include the following lines:
 
 #+begin_quote
 [library.sis8300ku]
+
 location = /full/path/to/project
+
 sync-uri = .
+
 sync-type = local
+
 auto-sync = true
 #+end_quote
 
@@ -308,7 +318,6 @@ I grouped the different type of files of the board into filesets in =board.core=
 	- scripts/vivadoProject.tcl
 	- sources/bd/pcie_ddr.tcl
 	- scripts/bdWrapper.tcl
-    file_type: tclSource
       file_type: tclSource
     genBoardCheckpoint:
       files:
@@ -332,9 +341,13 @@ A couple of new concepts are show:
 - since the checkpoint point is not a default artifact of /Edalize's/ /build/, the =genBoardCheckpoint= fileset includes the =genCheckpointCall.tcl= source that will call the user file =genCheckpoint.tcl=. The latter must be added in case another FuseSoC user does not use the /--no-export/ flag. The tcl commands to generate the checkpoint file are:
   #+begin_quote
   # Get absolute path of the script
+  
   set scriptLocation [file normalize [info script]]
+  
   # genCheckpoint.tcl should be in the same folder as this script
+  
   # property STEPS.SYNTH_DESIGN.TCL.POST will make sure to run genCheckpoint.tcl after successful synthesis
+  
   set_property STEPS.SYNTH_DESIGN.TCL.POST "[file dirname $scriptLocation]/genCheckpoint.tcl" [get_runs synth_1]
   #+end_quote
 - finally, the =boardCheckpoint= includes the generated dcp file and a script to read it in a vivado project since FuseSoC does not recognize .dcp files. This fileset will be my default target, i.e., these should be the only files imported on my final FPGA project.

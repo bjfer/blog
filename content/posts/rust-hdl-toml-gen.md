@@ -1,5 +1,5 @@
 +++
-title = "VHDL-TS TOML generator"
+title = "VHDL-LS TOML generator"
 date = 2025-02-15T14:34:00+01:00
 tags = ["emacs", "vhdl"]
 draft = false
