@@ -31,10 +31,10 @@ hdl_folder="sources/hdl"
 untracked_hdl_files=`git ls-files -o --exclude-standard ${hdl_folder}`
 
 if ! [ -z $untracked_hdl_files ]; then
-	echo "There are uncommited vhd files in ${hdl_folder}! Remove or add then!"
-	echo "Files uncommited:"
-	echo "$untracked_hdl_files"
-	exit 1
+echo "There are uncommited vhd files in ${hdl_folder}! Remove or add then!"
+echo "Files uncommited:"
+echo "$untracked_hdl_files"
+exit 1
 fi
 
 # If Emacs is available, this command will apply:
@@ -46,9 +46,9 @@ if command -v emacs &> /dev/null; then
 # Check only hdl files that have changed
 hdl_files=`git diff --name-only HEAD ${hdl_folder}`
 for i in $hdl_files; do
-	emacs -batch $i --eval '(progn (delete-trailing-whitespace) (vhdl-beautify-buffer) (replace-regexp "^\n+" "\n"))' -f save-buffer \
-		# send all messages to trash
-		2> /dev/null
+emacs -batch $i --eval '(progn (delete-trailing-whitespace) (vhdl-beautify-buffer) (replace-regexp "^\n+" "\n"))' -f save-buffer \
+# send all messages to trash
+2> /dev/null
 done
 # Add modified files
 git add $hdl_files

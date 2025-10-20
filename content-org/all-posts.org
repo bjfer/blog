@@ -4,7 +4,6 @@
 #+options: author:nil
 #+hugo_code_fence: t
 
-
 * DONE First post
 CLOSED: [2023-10-30 Mon 23:27]
 :PROPERTIES:
@@ -140,11 +139,9 @@ To address this, I wrote a [[https://github.com/bjfer/hdl-toml][VHDL-LS TOML gen
 
 * DRAFT A tale of three split keyboards (part I)
 
-For two years now, I have experienced stiffness in my hands. It is not a constant feeling; some mornings I must wait before trying to grab things. If I grab my Kindle or smartphone to do some reading, I have to shift the weight from time to time, even worse if I play Switch; when clenching my fists, I feel that the strength is not what it used to be. When the first symptoms showed up, the pain was really harsh; I consulted with my family doctor as well as a rheumatologist, who recommended some special blood analysis, but nothing definitive was found.
+For some years now, I have experience what seems to be [[https://www.orthopaediezentrum-muenchenost.de/en/orthopedics/diseases/carpal-tunnel-syndrome/][Carpal Tunnel Syndrome]] (CTS); instinctively, I thought that it might related to my heavy keyboard use; some studies point to [[https://www.sciencedirect.com/science/article/abs/pii/S0022510X14008028][in this direction]], particularly for mice users, while others concluded that [[https://onlinelibrary.wiley.com/doi/epdf/10.1002/art.22956][the opposite is more likely]]. Either way, while searching for ways to mitigate the issue, I found myself falling into the rabbit hole of split keyboards.
 
-Medically, the search continues, but I decided to do my own research, and my symptoms seem to be consistent with [[https://www.orthopaediezentrum-muenchenost.de/en/orthopedics/diseases/carpal-tunnel-syndrome/][Carpal Tunnel Syndrome]] (CTS).  Instinctively I thought that it might come from my heavy keyboard use; some studies point to [[https://www.sciencedirect.com/science/article/abs/pii/S0022510X14008028][in this direction]], particularly for mice users, while others concluded that [[https://onlinelibrary.wiley.com/doi/epdf/10.1002/art.22956][the opposite is more likely]]. Either way, while searching for ways to mitigate the issue, I found myself falling into the rabbit hole of split keyboards.
-
-There is tons of information on the internet concerning the advantages of using a split keyboard; I was vaguely familiar with them but never thought of getting one. A constant remark in online communities was how much it helped with their CTS, so I decided to try one myself. There are a lot of companies providing such keyboards, some of which focus on DIY kits for soldering your own and have tons of customization: type of switches, caps, colors, RGB lighting, etc. Then there are the open-source firmwares for such keyboards, different GUIs, and possibilities for key customization; it can be overwhelming. In this and following posts, I will try to summarize my experience with three different split keyboards.
+There are tons of information on the internet concerning the advantages of using a split keyboard; I was vaguely familiar with them but never thought of getting one. A constant remark in online communities was how much it helped with their CTS, so I decided to try one myself. There are a lot of companies providing such keyboards, some of which focus on DIY kits for soldering your own and have tons of customization: type of switches, caps, colors, RGB lighting, etc. Then there are the open-source firmwares for such keyboards, different GUIs, and possibilities for key customization; it can be overwhelming. In this and following posts, I will try to summarize my experience with three different split keyboards.
 
 * DONE Trying FuseSoc                                                  :vhdl:
 CLOSED: [2025-08-05 Tue 22:53]
@@ -240,19 +237,19 @@ The =timingInfo.core= /YAML/ file is shown below. For now the only target is the
   filesets:
     rtl:
       files:
-        - files1.vhd
-        - src/file2.vhd
-        - ...
+	- files1.vhd
+	- src/file2.vhd
+	- ...
       file_type: vhdlSource-2008
 
   targets:
     default: &default
       filesets:
-        - rtl
+	- rtl
       parameters:
-        - generic1=true
-        - generic2=3
-        - ...
+	- generic1=true
+	- generic2=3
+	- ...
 
   parameters:
     generic1:
@@ -341,13 +338,13 @@ A couple of new concepts are show:
 - since the checkpoint point is not a default artifact of /Edalize's/ /build/, the =genBoardCheckpoint= fileset includes the =genCheckpointCall.tcl= source that will call the user file =genCheckpoint.tcl=. The latter must be added in case another FuseSoC user does not use the /--no-export/ flag. The tcl commands to generate the checkpoint file are:
   #+begin_quote
   # Get absolute path of the script
-  
+
   set scriptLocation [file normalize [info script]]
-  
+
   # genCheckpoint.tcl should be in the same folder as this script
-  
+
   # property STEPS.SYNTH_DESIGN.TCL.POST will make sure to run genCheckpoint.tcl after successful synthesis
-  
+
   set_property STEPS.SYNTH_DESIGN.TCL.POST "[file dirname $scriptLocation]/genCheckpoint.tcl" [get_runs synth_1]
   #+end_quote
 - finally, the =boardCheckpoint= includes the generated dcp file and a script to read it in a vivado project since FuseSoC does not recognize .dcp files. This fileset will be my default target, i.e., these should be the only files imported on my final FPGA project.
@@ -522,3 +519,37 @@ There is no dependency between targets, so the final project Makefile looks like
 ** Final remarks
 
 There are ton of features from FuseSOC's that were out of my project scope (filters, generators, virtual cores and mappring). Nevertheless, the overall experience is a very positive one. The YAML file really makes the flow clear and very readable, while taking advantage of the format to easily reconfigure/create new projects. The documentation is enough to get simple projects up and running, but many things become more clear by digging into the source files in the git repository.
+
+* DONE Quick Git tip                                                    :git:
+CLOSED: [2025-10-20 Mon 11:34]
+:PROPERTIES:
+:EXPORT_FILE_NAME: git-tip
+:hidedoc:  true
+:END:
+
+Recently, one of the groups in my institute changed the base URL of their Git repository. This was done to mark a clear distinction in the release of a new software version. All projects were migrated to this new URL, which gives developers two possible solutions:
+
+- Re-clone all projects using the new URL
+- Update the URL value in the =.git/config= file of every affected repository
+
+On my side, I use ~insteadOf~ directives for Git URLs that I frequently clone from. These directives allow URL aliases to be defined within the context of Git. For example to refer to =https://gitlab.com/thatRepo/=, one could define the alias =thatRepo= by running the command
+
+#+begin_src shell
+git config --global url."https://gitlab.com/thatRepo".insteadOf "thatRepo:"
+#+end_src
+
+Which will add the following lines to your =.gitconfig= file:
+
+#+begin_quote
+  [url "https://gitlab.com/thatRepo/"]
+
+  insteadOf = thatRepo:
+#+end_quote
+
+then if I need to clone a specific project from that repository, I can simply type
+
+#+begin_src shell
+git clone thatRepo:thatProject
+#+end_src
+
+When the time came to migrate to the group's new repository, I simply updated the URL value my =.gitconfig=. 
