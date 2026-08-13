@@ -556,7 +556,12 @@ git clone thatRepo:thatProject
 
 When the time came to migrate to the group's new repository, I simply updated the URL value my =.gitconfig=. 
 
-* Dotfiles with Org Babel and Host-Specific Configuration         :emacs:org:
+* DONE Dotfiles with Org Babel and Host-Specific Configuration    :emacs:org:
+CLOSED: [2026-08-14 Fri 00:37]
+:PROPERTIES:
+:EXPORT_FILE_NAME: dotfile-org
+:hidedoc:  true
+:END:
 
 Like many Emacs users, I use ~org-babel-load-file~ to load custom Emacs Lisp source blocks from an Org file ([[https://orgmode.org/worg/org-contrib/babel/intro.html#emacs-initialization][as described here]]). I also use Org Babel’s tangling support to maintain separate Org files for several dotfiles, such as =~/.bashrc=, =~/.gitconfig=, =~/.signature=, and =~/.ssh/config=. This helps me keep my setup consistent across work and home machines.
 
