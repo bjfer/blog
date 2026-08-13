@@ -139,9 +139,11 @@ To address this, I wrote a [[https://github.com/bjfer/hdl-toml][VHDL-LS TOML gen
 
 * DRAFT A tale of three split keyboards (part I)
 
-For some years now, I have experience what seems to be [[https://www.orthopaediezentrum-muenchenost.de/en/orthopedics/diseases/carpal-tunnel-syndrome/][Carpal Tunnel Syndrome]] (CTS); instinctively, I thought that it might related to my heavy keyboard use; some studies point to [[https://www.sciencedirect.com/science/article/abs/pii/S0022510X14008028][in this direction]], particularly for mice users, while others concluded that [[https://onlinelibrary.wiley.com/doi/epdf/10.1002/art.22956][the opposite is more likely]]. Either way, while searching for ways to mitigate the issue, I found myself falling into the rabbit hole of split keyboards.
+For the last couple of years, I have been dealing with [[https://www.orthopaediezentrum-muenchenost.de/en/orthopedics/diseases/carpal-tunnel-syndrome/][carpal tunnel syndrome]] (CTS). My first instinct was to blame my heavy keyboard use (and, by proxy, my Emacs-Stockholm syndrome). Some studies seem to support that idea, especially for mouse users, while others suggest [[https://www.sciencedirect.com/science/article/abs/pii/S0022510X14008028][a link]] is weak or [[https://onlinelibrary.wiley.com/doi/epdf/10.1002/art.22956][unlikely altogether]]. In any case, while looking for ways to reduce the problem, I ended up going down the rabbit hole of split keyboards.
 
-There are tons of information on the internet concerning the advantages of using a split keyboard; I was vaguely familiar with them but never thought of getting one. A constant remark in online communities was how much it helped with their CTS, so I decided to try one myself. There are a lot of companies providing such keyboards, some of which focus on DIY kits for soldering your own and have tons of customization: type of switches, caps, colors, RGB lighting, etc. Then there are the open-source firmwares for such keyboards, different GUIs, and possibilities for key customization; it can be overwhelming. In this and following posts, I will try to summarize my experience with three different split keyboards.
+There is no shortage of information online about the benefits of split keyboards. I had been vaguely aware of them before, but never considered buying one. What kept coming up in online communities was how much they had helped people with CTS, so I decided to try one myself. There are many companies making these keyboards. Some offer DIY kits, allowing one to solder your own and customize nearly everything: switches, keycaps, colors, RGB lighting, and more. Beyond the hardware, there are also open-source firmware options, various configuration tools, and countless possibilities for remapping keys. It can all be a bit overwhelming. In this post and the ones that follow, I will try to summarize my experience with three different split keyboards.
+
+
 
 * DONE Trying FuseSoc                                                  :vhdl:
 CLOSED: [2025-08-05 Tue 22:53]
@@ -553,3 +555,160 @@ git clone thatRepo:thatProject
 #+end_src
 
 When the time came to migrate to the group's new repository, I simply updated the URL value my =.gitconfig=. 
+
+* Dotfiles with Org Babel and Host-Specific Configuration         :emacs:org:
+
+Like many Emacs users, I use ~org-babel-load-file~ to load custom Emacs Lisp source blocks from an Org file ([[https://orgmode.org/worg/org-contrib/babel/intro.html#emacs-initialization][as described here]]). I also use Org Babel’s tangling support to maintain separate Org files for several dotfiles, such as =~/.bashrc=, =~/.gitconfig=, =~/.signature=, and =~/.ssh/config=. This helps me keep my setup consistent across work and home machines.
+
+I use the same approach for software that my Emacs setup depends on. For example, I compile mu/mu4e from source and keep the installation steps in a single Org Babel source block. That makes it easy to update or reinstall by simply re-running the relevant block.
+
+Many online tutorials cover Org Babel and tangling, but few show how to use Org’s broader feature set to handle scenarios such as:
+
+- Reusing the same information across multiple code blocks to avoid typos, such as a full name or work email address
+- Managing dependencies between Org files
+- Defining reusable functions for common tasks, such as downloading custom =.el= files into a =site-lisp= directory
+- Maintaining host-specific configuration, such as locally generated SSH keys or GPG subkeys for Git signing and authentication
+
+
+To support this, I wrote an =env.org= file that contains the information and helper functions I need to generate both my dotfiles and my Emacs init file, while keeping them consistent with the target host.
+
+** Reusing information
+
+For static information, I define named blocks and reference them using Org’s [[https://orgmode.org/manual/Noweb-Reference-Syntax.html][noweb syntax]]. For example, the following block contains my name:
+
+#+begin_src text
+#+NAME: full-name
+: Bruno Fernandes
+#+end_src
+
+I can then use it in both my Emacs init Org file:
+
+#+begin_src emacs-lisp
+;; emacs-lisp block
+(setq user-full-name "<<env.org:full-name()>>")
+#+end_src
+
+as my =signature.org= file:
+
+#+begin_src tesxt
+Mit freundlichen Grüßen / Best regards,
+
+-- 
+<<env.org:full-name()>>
+#+end_src
+
+The same approach also works for host-specific values. For example:
+
+#+begin_src text
+#+NAME: host-username
+,#+begin_src emacs-lisp
+(user-login-name)
+,#+end_src
+#+end_src
+
+This retrieves the current host’s username, which I can then use in a Docker installation block:
+
+#+begin_src shell
+# Add user to docker group (needs logout)
+groupadd docker
+usermod -aG docker <<env.org:host-username()>>
+#+end_src
+
+** Short names, full paths 
+
+Whenever I need a file or directory location, I always use the full path rather than relying on assumptions. Since most of my files live somewhere under my home directory, I wrote a helper function that expands short paths into full ones:
+
+#+begin_src text
+#+NAME: expand-home-folder
+,#+begin_src emacs-lisp :var path=""
+;; Full path of location (defaults to home)
+(expand-file-name (concat "~/" path))
+,#+end_src
+#+end_src
+
+For example, to enable [[https://git-scm.com/book/en/v2/Appendix-A:-Git-in-Other-Environments-Git-in-Bash][Git prompt support in Bash]], I need to download a script from the Git repository and source it from =.bashrc=. The following block returns the full path where I want the file to live:
+
+#+begin_src text
+#+NAME: git-prompt-file
+,#+CALL: expand-home-folder(".gitprompt.sh")
+#+end_src
+
+I can use that short name as an argument to a helper function that wraps ~wget~ and expects a URL and a destination path:
+
+#+begin_src text
+,#+CALL: wget-file("https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh", git-prompt-file())
+#+end_src
+
+And I can reuse the same reference in my =bash.org= file:
+
+#+begin_src text
+,#+begin_src shell
+# Git prompt
+source <<git-prompt-file()>>
+,#+end_src
+#+end_src
+
+This keeps paths consistent across installation and configuration steps. I use the same approach for Git repositories that I clone frequently and for software that I compile from source, such as mu:
+
+#+begin_src text
+,#+begin_src shell :var git-link=https://github.com/djcb/mu.git folder=mu
+;; Note that var must have the same name as the one defined in git_clone
+<<git_clone>>
+cd mu
+meson setup build -Demacs=<<bash.org:emacs-bin-location()>>emacs -Dlispdir=<<emacs.org:emacs-lisp-dir()>>
+meson compile -C build
+meson install -C build
+,#+end_src
+#+end_src
+
+This example also shows how one Org file can depend on values defined in another. Building mu/mu4e requires the Emacs binary location and the target Lisp directory, while Emacs itself must later know where to find the installed mu4e Lisp files.
+
+** Host specific information
+
+I keep an alist of all proprieties which are host specific. 
+
+#+begin_src text
+#+NAME: host-info
+,#+begin_src emacs-lisp
+  ''(("<<work-host()>>" :gpg-sign 111AAABBB :gpg-auth CCCDDD555 :email <<work-email()>> :gitlab-key /common/user123/.ssh/gitlab_key)
+    ("<<my-laptop()>>" :gpg-sign EEEFFF0000 :gpg-auth 123456 :email <<my-email()>> :gitlab-key /home/bjfer/.ssh/gitlab_012026 :github-key /home/bjfer/.ssh/github_022025))
+,#+end_src
+#+end_src
+
+Since the hostname is available through ~(system-name)~, I wrote a helper function that looks up the appropriate value for the current host:
+
+#+begin_src text
+#+NAME: get-host-info
+,#+begin_src emacs-lisp :var property='info
+  (plist-get (cdr (assoc (system-name) <<host-info()>>)) property)
+,#+end_src
+#+end_src
+
+I can then use it in blocks that tangle host-specific values, for example in =gitconfig.org=:
+
+#+begin_src text
+[user]
+signingKey = <<env.org:get-host-info(':gpg-sign)>>
+#+end_src
+
+I can also use it to conditionally tangle sections.
+
+#+begin_src text
+#+NAME: tangle-host
+,#+begin_src emacs-lisp :var property='nil path='nil
+(if <<get-host-info>> (expand-file-name (symbol-name path)) '"no")
+,#+end_src
+#+end_src
+
+In my =sshconfig.org= file, the following section will not be tangled on my work machine, because no GitHub SSH key is defined there:
+
+#+begin_src text
+,#+begin_src text :tangle (org-babel-ref-resolve "env.org:tangle-host(':github-key,'~/.ssh/config)")
+Host github
+User git
+Hostname github.com
+IdentityFile <<env.org:get-host-info(':github-key)>>
+,#+end_src
+#+end_src
+
+I’m sure there are more /Elisp-y/ ways to do this, but my goal was simply to show how Org Babel features, combined with a bit of Emacs Lisp, can make this setup a flexible system for managing configuration files.
